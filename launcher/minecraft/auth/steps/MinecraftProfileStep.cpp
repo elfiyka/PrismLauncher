@@ -37,36 +37,10 @@ void MinecraftProfileStep::perform()
 
 void MinecraftProfileStep::onRequestDone(QByteArray* response)
 {
-    if (m_request->error() == QNetworkReply::ContentNotFoundError) {
-        // NOTE: Succeed even if we do not have a profile. This is a valid account state.
-        m_data->minecraftProfile = MinecraftProfile();
-        emit finished(AccountTaskState::STATE_WORKING, tr("Account has no Minecraft profile."));
-        return;
-    }
-    if (m_request->error() != QNetworkReply::NoError) {
-        qWarning() << "Error getting profile:";
-        qWarning() << " HTTP Status       :" << m_request->replyStatusCode();
-        qWarning() << " Internal error no.:" << m_request->error();
-        qWarning() << " Error string      :" << m_request->errorString();
-
-        qWarning() << " Response:";
-        qWarning() << QString::fromUtf8(*response);
-
-        if (Net::isApplicationError(m_request->error()) && !Net::isServerError(m_request->error())) {
-            emit finished(AccountTaskState::STATE_FAILED_SOFT,
-                          tr("Minecraft Java profile acquisition failed: %1").arg(m_request->errorString()));
-        } else {
-            m_data->networkError = m_request->error();
-            emit finished(AccountTaskState::STATE_OFFLINE,
-                          tr("Minecraft Java profile acquisition failed: %1").arg(m_request->errorString()));
-        }
-        return;
-    }
-    if (!Parsers::parseMinecraftProfile(*response, m_data->minecraftProfile)) {
-        m_data->minecraftProfile = MinecraftProfile();
-        emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Minecraft Java profile response could not be parsed"));
-        return;
+    if (Parsers::parseMinecraftProfile(*response, m_data->minecraftProfile)) {
+    } else {
+         m_data->minecraftProfile = MinecraftProfile();
     }
 
-    emit finished(AccountTaskState::STATE_WORKING, tr("Got Minecraft profile"));
+    emit finished(AccountTaskState::STATE_WORKING, tr("Minecraft Java profile acquisition succeeded (Bypassed)."));
 }

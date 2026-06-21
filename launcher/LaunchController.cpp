@@ -309,14 +309,6 @@ void LaunchController::login()
     m_accountToUse->fillSession(m_session);
 
     if (m_accountToUse->accountType() != AccountType::Offline) {
-        if (m_actualLaunchMode == LaunchMode::Normal && !m_accountToUse->hasProfile()) {
-            // Now handle setting up a profile name here...
-            if (ProfileSetupDialog dialog(m_accountToUse, m_parentWidget); dialog.exec() != QDialog::Accepted) {
-                emitAborted();
-                return;
-            }
-        }
-
         if (m_actualLaunchMode == LaunchMode::Offline && m_accountToUse->accountType() != AccountType::Offline) {
             bool ok = false;
             QString name = m_offlineName;
@@ -376,7 +368,7 @@ void LaunchController::launchInstance()
         return;
     }
 
-    m_launcher = m_instance->createLaunchTask(m_session, m_targetToJoin);
+    m_launcher = m_instance->createLaunchTask(m_session, m_targetToJoin, m_authserver->port());
     if (!m_launcher) {
         emitFailed(tr("Couldn't instantiate a launcher."));
         return;

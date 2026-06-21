@@ -41,6 +41,7 @@
  */
 
 #include "Application.h"
+#include "AuthServer.h"
 #include "BuildConfig.h"
 
 #include "DataMigrationTask.h"
@@ -1008,6 +1009,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qInfo() << "<> Accounts loaded.";
     }
 
+    {
+        m_authserver.reset(new AuthServer(this));
+        qDebug() << "<> Auth server started.";
+    }
+
     // init the http meta cache
     {
         m_metacache.reset(new HttpMetaCache("metacache"));
@@ -1024,6 +1030,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_metacache->addBase("ModrinthModpacks", QDir("cache/ModrinthModpacks").absolutePath());
         m_metacache->addBase("translations", QDir("translations").absolutePath());
         m_metacache->addBase("meta", QDir("meta").absolutePath());
+        m_metacache->addBase("injectors", QDir("injectors").absolutePath());
         m_metacache->addBase("java", QDir("cache/java").absolutePath());
         m_metacache->addBase("feed", QDir("cache/feed").absolutePath());
         m_metacache->Load();
@@ -1549,6 +1556,7 @@ bool Application::launch(MinecraftInstance* instance,
         controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setTargetToJoin(targetToJoin);
         controller->setAccountToUse(accountToUse);
+        controller->setAuthserver(m_authserver);
         controller->setOfflineName(offlineName);
         if (window) {
             controller->setParentWidget(window);

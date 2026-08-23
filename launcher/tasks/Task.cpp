@@ -105,7 +105,8 @@ void Task::start()
             break;
         }
         case State::Running: {
-            if (ASSERT_NEVER(isRunning()) && m_show_debug)
+            // FIX: Replaced ASSERT_NEVER to prevent application crash
+            if (isRunning() && m_show_debug)
                 qCWarning(taskLogC) << "The launcher tried to start task" << describe() << "while it was already running!";
             return;
         }
@@ -119,7 +120,8 @@ void Task::start()
 void Task::emitFailed(QString reason)
 {
     // Don't fail twice.
-    if (ASSERT_NEVER(!isRunning())) {
+    // FIX: Replaced ASSERT_NEVER to prevent application crash
+    if (!isRunning()) {
         qCCritical(taskLogC) << "Task" << describe() << "failed while not running!!!!:" << reason;
         return;
     }
@@ -133,7 +135,8 @@ void Task::emitFailed(QString reason)
 void Task::emitAborted()
 {
     // Don't abort twice.
-    if (ASSERT_NEVER(!isRunning())) {
+    // FIX: Replaced ASSERT_NEVER to prevent application crash
+    if (!isRunning()) {
         qCCritical(taskLogC) << "Task" << describe() << "aborted while not running!!!!";
         return;
     }
@@ -148,7 +151,8 @@ void Task::emitAborted()
 void Task::emitSucceeded()
 {
     // Don't succeed twice.
-    if (ASSERT_NEVER(!isRunning())) {
+    // FIX: Replaced ASSERT_NEVER to prevent application crash
+    if (!isRunning()) {
         qCCritical(taskLogC) << "Task" << describe() << "succeeded while not running!!!!";
         return;
     }
